@@ -1,0 +1,145 @@
+﻿
+
+@page "/"
+@using System.Timers
+@using CanSatDashboard.Data
+
+<div class="dashboard">
+    <div class="sidebar">
+        <nav>
+            <button class="menu-button">Dashboard</button>
+            <button class="menu-button">Telemetry</button>
+            <button class="menu-button">Commands</button>
+        </nav>
+    </div>
+
+    <div class="main-content">
+        <div class="top-bar">
+            <h1>CanSat Dashboard</h1>
+            <div class="status">
+                <div>Mission Time <span class="value">@MissionTime</span></div>
+                <div>Battery <span class="value">@($"{BatteryVoltage:F2}") V</span></div>
+                <div class="menu"><span>&#9776;</span></div>
+            </div>
+        </div>
+
+        <div class="sensor-grid">
+            @foreach (var sensor in sensors)
+            {
+                <div class="sensor-card" @onclick="@(() => FocusSensor(sensor))">
+                    <div class="label" style="font-size: 24px;">@sensor.Label</div>
+                    <div class="value" style="font-size: 40px;">@sensor.Value</div>
+                </div>
+            }
+        </div>
+
+        <div class="card-3d">
+            <div>CANSAT 3D Object</div>
+            <div class="orientation" style="font-size: 32px;">
+                Pitch: @($"{Pitch:F2}")° - Roll: @($"{Roll:F2}")° - Yaw: @($"{Yaw:F2}")°
+            </div>
+        </div>
+
+        <div class="live-output">
+            <textarea readonly style="font-size: 10px;">@LiveData</textarea>
+            <div class="command-input">
+                <input type="text" placeholder="Enter command" @onkeypress="HandleKeyPress" />
+                <button @onclick="SendCommand">Send</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@code {
+    private string MissionTime = "00:00:00";
+    private double BatteryVoltage = 4.2;
+    private double Pitch = 0.0;
+    private double Roll = 0.0;
+    private double Yaw = 0.0;
+    private string LiveData = "";
+    private List<Sensor> sensors = new List<Sensor>
+    {
+        new Sensor { Label = "Temperature", Value = "25.32°C" },
+        new Sensor { Label = "Pressure", Value = "1013.25 hPa" },
+        new Sensor { Label = "Humidity", Value = "65.43%" },
+        new Sensor { Label = "Satellite", Value = "X" },
+        new Sensor { Label = "UV Index", Value = "3" },
+        new Sensor { Label = "Lux", Value = "500 lx" },
+        new Sensor { Label = "VOC Index", Value = "2" },
+        new Sensor { Label = "Picture", Value = "X" },
+        new Sensor { Label = "Magnetic Field", Value = "X: 0.1 - Y: 0.2 - Z: 0.3" },
+        new Sensor { Label = "Acceleration", Value = "X: 9.81 m/s² - Y: 0.0 m/s² - Z: 0.0 m/s²" }
+    };
+
+    private Timer _telemetryTimer;
+    private static readonly Random _random = new Random();
+
+    protected override void OnInitialized()
+    {
+        // Initialize telemetry simulation
+        _telemetryTimer = new Timer(1000);
+        _telemetryTimer.Elapsed += UpdateTelemetry;
+        _telemetryTimer.Start();
+    }
+
+    private void UpdateTelemetry(object sender, ElapsedEventArgs e)
+    {
+        // Update mission time
+        var timeSpan = TimeSpan.Parse(MissionTime).Add(TimeSpan.FromSeconds(1));
+        MissionTime = timeSpan.ToString(@"hh\:mm\:ss");
+
+        // Update battery voltage (simulated discharge)
+        BatteryVoltage -= 0.001;
+        if (BatteryVoltage < 3.0) BatteryVoltage = 4.2;
+
+        // Update orientation
+        Pitch = RandomDouble(-180, 180);
+        Roll = RandomDouble(-90, 90);
+        Yaw = RandomDouble(0, 360);
+
+        // Update live output
+        var randomSensor = sensors[_random.Next(sensors.Count)];
+        string newLog = $"[{DateTime.Now:HH:mm:ss}] {randomSensor.Label}: {randomSensor.Value}\n";
+        LiveData = newLog + LiveData;
+
+        // Limit the log length
+        if (LiveData.Length > 4000)
+        {
+            LiveData = LiveData.Substring(0, 4000);
+        }
+
+        // Trigger UI refresh
+        InvokeAsync(StateHasChanged);
+    }
+
+    private double RandomDouble(double min, double max)
+    {
+        return min + (_random.NextDouble() * (max - min));
+    }
+
+    private void FocusSensor(Sensor sensor)
+    {
+        // Add sensor-specific behavior here
+        Console.WriteLine($"Focused on {sensor.Label}");
+    }
+
+    private void HandleKeyPress(KeyboardEventArgs args)
+    {
+        if (args.Key == "Enter")
+        {
+            SendCommand();
+        }
+    }
+
+    private void SendCommand()
+    {
+        // Add command sending logic here
+        Console.WriteLine("Send Command clicked.");
+    }
+
+    public void Dispose()
+    {
+        _telemetryTimer?.Dispose();
+    }
+}
