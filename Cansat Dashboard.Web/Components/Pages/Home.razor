@@ -1,6 +1,4 @@
-﻿@* File: Components/Pages/Home.razor *@
-
-@page "/"
+﻿@page "/"
 @rendermode @(new InteractiveServerRenderMode(prerender: true))
 
 @using Cansat_Dashboard.Web.Data
@@ -28,18 +26,18 @@ else
         <div class="flex flex-col gap-6">
             <!-- SENSORS GRID -->
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <div class="sensor-card"><h3 class="sensor-card-title">Temperature</h3><p class="sensor-card-value">@cansatData.Temperature.ToString("F2")°</p></div>
-                <div class="sensor-card"><h3 class="sensor-card-title">Pressure</h3><p class="sensor-card-value">@cansatData.Pressure.ToString("F0")hPa</p></div>
-                <div class="sensor-card"><h3 class="sensor-card-title">Humidity</h3><p class="sensor-card-value">@cansatData.Humidity.ToString("F2")%</p></div>
-                <div class="sensor-card"><h3 class="sensor-card-title">Satelit</h3><p class="sensor-card-value">@cansatData.SatelliteCount</p></div>
-                <div class="sensor-card"><h3 class="sensor-card-title">UV Index</h3><p class="sensor-card-value">@cansatData.UvIndex</p></div>
-                <div class="sensor-card"><h3 class="sensor-card-title">Lux</h3><p class="sensor-card-value">@cansatData.Lux lx</p></div>
-                <div class="sensor-card"><h3 class="sensor-card-title">VOC Index</h3><p class="sensor-card-value">@cansatData.VocIndex</p></div>
-                <div class="sensor-card"><h3 class="sensor-card-title">Picture</h3><p class="sensor-card-value">@cansatData.PictureStatus</p></div>
+                <div class="data-card"><h4>Temperature</h4><p>@cansatData.Temperature.ToString("F2")°</p></div>
+                <div class="data-card"><h4>Pressure</h4><p>@cansatData.Pressure.ToString("F0")hPa</p></div>
+                <div class="data-card"><h4>Humidity</h4><p>@cansatData.Humidity.ToString("F2")%</p></div>
+                <div class="data-card"><h4>Satelit</h4><p>@cansatData.SatelliteCount</p></div>
+                <div class="data-card"><h4>UV Index</h4><p>@cansatData.UvIndex</p></div>
+                <div class="data-card"><h4>Lux</h4><p>@cansatData.Lux lx</p></div>
+                <div class="data-card"><h4>VOC Index</h4><p>@cansatData.VocIndex</p></div>
+                <div class="data-card"><h4>Picture</h4><p>@cansatData.PictureStatus</p></div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="sensor-card col-span-1"><h3 class="sensor-card-title">Magnetic field</h3><p class="sensor-card-value">x:@cansatData.MagneticField.X y:@cansatData.MagneticField.Y z:@cansatData.MagneticField.Z</p></div>
-                <div class="sensor-card col-span-1"><h3 class="sensor-card-title">Acceleration</h3><p class="sensor-card-value">x:@cansatData.Acceleration.X.ToString("F2") y:@cansatData.Acceleration.Y.ToString("F2") z:@cansatData.Acceleration.Z.ToString("F2")</p></div>
+                <div class="data-card col-span-1"><h4>Magnetic field</h4><p class="small-text">x:@cansatData.MagneticField.X y:@cansatData.MagneticField.Y z:@cansatData.MagneticField.Z</p></div>
+                <div class="data-card col-span-1"><h4>Acceleration</h4><p class="small-text">x:@cansatData.Acceleration.X.ToString("F2") y:@cansatData.Acceleration.Y.ToString("F2") z:@cansatData.Acceleration.Z.ToString("F2")</p></div>
             </div>
 
             <!-- LIVE OUTPUT / TERMINAL -->

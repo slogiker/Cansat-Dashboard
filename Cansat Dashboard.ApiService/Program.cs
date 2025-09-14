@@ -3,8 +3,9 @@ using Cansat_Dashboard.ApiService.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Add service defaults
 builder.AddServiceDefaults();
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -12,7 +13,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddSignalR();
 builder.Services.AddHostedService<TelemetryService>();
 
-// *** ADD THIS CORS POLICY ***
+// Add CORS policy
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
@@ -23,9 +24,6 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.AddEndpointsApiExplorer(); 
-builder.Services.AddSwaggerGen();
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -35,7 +33,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// *** ENABLE THE CORS POLICY ***
+// Enable CORS
 app.UseCors();
 
 app.UseHttpsRedirection();
@@ -43,7 +41,7 @@ app.UseHttpsRedirection();
 // Map the DashboardHub so the frontend can connect to it
 app.MapHub<DashboardHub>("/dashboardHub");
 
+// Map default endpoints
 app.MapDefaultEndpoints();
 
 app.Run();
-

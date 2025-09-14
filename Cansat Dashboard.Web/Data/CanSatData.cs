@@ -1,4 +1,4 @@
-﻿namespace Cansat_Dashboard.ApiService.Data;
+﻿namespace Cansat_Dashboard.Web.Data;
 
 public class CanSatData
 {
