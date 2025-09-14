@@ -1,37 +1,49 @@
+using Cansat_Dashboard.ApiService.Hubs;
+using Cansat_Dashboard.ApiService.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add service defaults & Aspire client integrations.
-builder.AddServiceDefaults();
-
 // Add services to the container.
-builder.Services.AddProblemDetails();
+builder.AddServiceDefaults();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+// Add SignalR and our telemetry service
+builder.Services.AddSignalR();
+builder.Services.AddHostedService<TelemetryService>();
+
+// *** ADD THIS CORS POLICY ***
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
+builder.Services.AddEndpointsApiExplorer(); 
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-app.UseExceptionHandler();
-
-string[] summaries = ["Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"];
-
-app.MapGet("/weatherforecast", () =>
+if (app.Environment.IsDevelopment())
 {
-    var forecast = Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+// *** ENABLE THE CORS POLICY ***
+app.UseCors();
+
+app.UseHttpsRedirection();
+
+// Map the DashboardHub so the frontend can connect to it
+app.MapHub<DashboardHub>("/dashboardHub");
 
 app.MapDefaultEndpoints();
 
 app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}

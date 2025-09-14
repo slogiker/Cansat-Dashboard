@@ -7,10 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Cansat Dashboard.ServiceDefaults\Cansat Dashboard.ServiceDefaults.csproj" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.0-rc.1.25451.107" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Cansat Dashboard.ServiceDefaults\Cansat Dashboard.ServiceDefaults.csproj" />
   </ItemGroup>
 
 </Project>
