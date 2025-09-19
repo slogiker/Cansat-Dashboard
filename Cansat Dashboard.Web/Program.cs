@@ -1,28 +1,20 @@
 using Cansat_Dashboard.Web.Components;
-using Cansat_Dashboard.Web.Services;
 using Cansat_Dashboard.Web.Hubs;
+using Cansat_Dashboard.Web.Services;
 using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.AspNetCore.SignalR.Client;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add service defaults - if you're using .NET Aspire
+WebApplicationBuilder builder1 = builder;
 // builder.AddServiceDefaults();
 
-// Add services to the container.
-builder.Services.AddRazorComponents()
+builder1.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
-
-// Add SignalR
-builder.Services.AddSignalR();
-
-// Add DashboardState service
-builder.Services.AddScoped<DashboardState>();
-
-// Add TelemetryService
-builder.Services.AddHostedService<TelemetryService>();
-
-// Add Response Compression for SignalR
-builder.Services.AddResponseCompression(opts =>
+builder1.Services.AddSignalR();
+builder1.Services.AddScoped<DashboardState>();
+builder1.Services.AddHostedService<TelemetryService>();
+builder1.Services.AddResponseCompression(opts =>
 {
     opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
         new[] { "application/octet-stream" });
