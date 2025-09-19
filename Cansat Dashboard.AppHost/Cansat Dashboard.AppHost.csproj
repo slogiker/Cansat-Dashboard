@@ -1,23 +1,20 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <Sdk Name="Aspire.AppHost.Sdk" Version="9.3.1" />
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<UserSecretsId>9d3cbd08-b380-4263-879e-d1680872b81e</UserSecretsId>
+	</PropertyGroup>
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <UserSecretsId>9d3cbd08-b380-4263-879e-d1680872b81e</UserSecretsId>
-  </PropertyGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Cansat Dashboard.ApiService\Cansat Dashboard.ApiService.csproj" />
+		<ProjectReference Include="..\Cansat Dashboard.Web\Cansat Dashboard.Web.csproj" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Cansat Dashboard.ApiService\Cansat Dashboard.ApiService.csproj" />
-    <ProjectReference Include="..\Cansat Dashboard.Web\Cansat Dashboard.Web.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Aspire.Hosting.AppHost" Version="9.3.1" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.0-rc.1.25451.107" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Aspire.Hosting.AppHost" Version="8.0.2" />
+	</ItemGroup>
 
 </Project>
