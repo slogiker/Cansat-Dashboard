@@ -1,13 +1,14 @@
 ﻿@page "/"
 @rendermode @(new InteractiveServerRenderMode(prerender: true))
 
-@using Cansat_Dashboard.Web.Data
-@using Cansat_Dashboard.Web.Services
+@using Cansat_Dashboard.ApiService.Data
+@using Cansat_Dashboard.ApiService.Services
 @using Microsoft.AspNetCore.SignalR.Client
 @inject IConfiguration Configuration
 @inject NavigationManager Navigation
 @inject IJSRuntime JSRuntime
 @inject DashboardState State
+@inject IHttpClientFactory HttpClientFactory
 @implements IAsyncDisposable
 
 <PageTitle>Dashboard</PageTitle>
@@ -36,7 +37,7 @@ else
                 <div class="data-card"><h4>Picture</h4><p>@cansatData.PictureStatus</p></div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="data-card col-span-1"><h4>Magnetic field</h4><p class="small-text">x:@cansatData.MagneticField.X y:@cansatData.MagneticField.Y z:@cansatData.MagneticField.Z</p></div>
+                <div class="data-card col-span-1"><h4>Magnetic field</h4><p class="small-text">x:@cansatData.MagneticField.X.ToString("F2") y:@cansatData.MagneticField.Y.ToString("F2") z:@cansatData.MagneticField.Z.ToString("F2")</p></div>
                 <div class="data-card col-span-1"><h4>Acceleration</h4><p class="small-text">x:@cansatData.Acceleration.X.ToString("F2") y:@cansatData.Acceleration.Y.ToString("F2") z:@cansatData.Acceleration.Z.ToString("F2")</p></div>
             </div>
 
@@ -79,8 +80,15 @@ else
     {
         try
         {
+            // Get the API service URL
+            var httpClient = HttpClientFactory.CreateClient("apiservice");
+            var apiBaseUrl = httpClient.BaseAddress?.ToString().TrimEnd('/') ?? "https://localhost:7427";
+
+            // Build the SignalR hub URL
+            var hubUrl = $"{apiBaseUrl}/dashboardHub";
+
             _hubConnection = new HubConnectionBuilder()
-                .WithUrl(Navigation.ToAbsoluteUri("/dashboardHub"))
+                .WithUrl(hubUrl)
                 .Build();
 
             _hubConnection.On<CanSatData>("ReceiveSensorData", (data) =>
