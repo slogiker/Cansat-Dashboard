@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.SignalR.Client;
 var builder = WebApplication.CreateBuilder(args);
 
 WebApplicationBuilder builder1 = builder;
-// builder.AddServiceDefaults();
 
 builder1.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
@@ -19,8 +18,22 @@ builder1.Services.AddResponseCompression(opts =>
     opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
         new[] { "application/octet-stream" });
 });
+builder1.AddHttpClient("apiservice");
+builder1.Services.AddScoped(sp =>
+{
+    var clientFactory = sp.GetRequiredService<IHttpClientFactory>();
+    var httpClient = clientFactory.CreateClient("apiservice");
 
-var app = builder.Build();
+    // Dynamically build the hub URL using the correct address from service discovery
+    var hubUrl = new Uri(httpClient.BaseAddress!, "dashboardhub");
+
+    return new HubConnectionBuilder()
+        .WithUrl(hubUrl)
+        .WithAutomaticReconnect()
+        .Build();
+});
+
+var app = builder1.Build();
 
 app.UseResponseCompression();
 
@@ -40,6 +53,8 @@ app.MapRazorComponents<App>()
 
 // Map SignalR Hub
 app.MapHub<DashboardHub>("/dashboardHub");
+
+
 
 // Map default endpoints if using Aspire
 // app.MapDefaultEndpoints();

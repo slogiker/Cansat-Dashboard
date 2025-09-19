@@ -1,8 +1,8 @@
 ﻿@page "/"
 @rendermode @(new InteractiveServerRenderMode(prerender: true))
 
-@using Cansat_Dashboard.Web.Data
-@using Cansat_Dashboard.Web.Services
+@using Cansat_Dashboard.ApiService.Data
+@using Cansat_Dashboard.ApiService.Services
 @using Microsoft.AspNetCore.SignalR.Client
 @inject IConfiguration Configuration
 @inject NavigationManager Navigation
@@ -22,45 +22,49 @@
 else
 {
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
-        <!-- LEFT COLUMN: SENSORS & TERMINAL -->
         <div class="flex flex-col gap-6">
-            <!-- SENSORS GRID -->
+
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div class="data-card"><h4>Temperature</h4><p>@cansatData.Temperature.ToString("F2")°</p></div>
                 <div class="data-card"><h4>Pressure</h4><p>@cansatData.Pressure.ToString("F0")hPa</p></div>
                 <div class="data-card"><h4>Humidity</h4><p>@cansatData.Humidity.ToString("F2")%</p></div>
                 <div class="data-card"><h4>Satelit</h4><p>@cansatData.SatelliteCount</p></div>
+
                 <div class="data-card"><h4>UV Index</h4><p>@cansatData.UvIndex</p></div>
                 <div class="data-card"><h4>Lux</h4><p>@cansatData.Lux lx</p></div>
                 <div class="data-card"><h4>VOC Index</h4><p>@cansatData.VocIndex</p></div>
                 <div class="data-card"><h4>Picture</h4><p>@cansatData.PictureStatus</p></div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
                 <div class="data-card col-span-1"><h4>Magnetic field</h4><p class="small-text">x:@cansatData.MagneticField.X y:@cansatData.MagneticField.Y z:@cansatData.MagneticField.Z</p></div>
                 <div class="data-card col-span-1"><h4>Acceleration</h4><p class="small-text">x:@cansatData.Acceleration.X.ToString("F2") y:@cansatData.Acceleration.Y.ToString("F2") z:@cansatData.Acceleration.Z.ToString("F2")</p></div>
             </div>
 
-            <!-- LIVE OUTPUT / TERMINAL -->
             <div class="dark-container flex-grow flex flex-col p-2">
                 <label class="text-xs text-gray-400 px-2">Live output</label>
                 <div id="live-output" class="flex-grow bg-transparent p-2 text-sm whitespace-pre-wrap overflow-y-auto h-32">
                     @((MarkupString)liveOutput)
                 </div>
                 <input id="command-input" type="text" placeholder="Enter command..." class="w-full bg-transparent border-t border-gray-600 p-2 focus:outline-none text-sm">
+
             </div>
         </div>
 
-        <!-- RIGHT COLUMN: 3D OBJECT & MAP -->
         <div class="flex flex-col gap-6">
             <div class="dark-container flex-grow flex flex-col min-h-[300px]">
                 <div id="model-container" class="w-full h-full flex-grow relative flex items-center justify-center">
-                    <p class="text-gray-400">CANSAT 3D object placeholder</p>
+                    <p class="text-gray-400">
+                        CANSAT 3D
+                        object placeholder
+                    </p>
                 </div>
             </div>
             <p id="rotation-display" class="text-center text-sm text-gray-300 -mt-2">Pitch: @cansatData.Pitch.ToString("F2")° - Roll: @cansatData.Roll.ToString("F2")° - Yaw: @cansatData.Yaw.ToString("F2")°</p>
 
             <div class="dark-container flex flex-col">
                 <div class="w-full h-auto rounded-md object-cover flex items-center justify-center bg-gray-700 min-h-[150px]">
+
                     <p class="text-gray-400">Map placeholder</p>
                 </div>
             </div>
