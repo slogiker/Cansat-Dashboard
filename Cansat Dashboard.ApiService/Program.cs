@@ -1,5 +1,7 @@
 using Cansat_Dashboard.ApiService.Hubs;
 using Cansat_Dashboard.ApiService.Services;
+using Microsoft.OpenApi.Models;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
