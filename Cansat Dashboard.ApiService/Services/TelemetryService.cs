@@ -1,97 +1,68 @@
-﻿using Cansat_Dashboard.ApiService.Data;
+﻿using Cansat_Dashboard.ApiService;
 using Cansat_Dashboard.ApiService.Hubs;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Hosting;
 using System;
+using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Hosting;
 
 namespace Cansat_Dashboard.ApiService.Services;
 
-public class TelemetryService : BackgroundService
+public class TelemetryService(IHubContext<DashboardHub> hub) : BackgroundService
 {
-    private readonly IHubContext<DashboardHub> _hubContext;
-
-    public TelemetryService(IHubContext<DashboardHub> hubContext)
-    {
-        _hubContext = hubContext;
-    }
-
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        // Wait a moment for the services to start up
-        await Task.Delay(2000, stoppingToken);
-
-        var packetLines = await File.ReadAllLinesAsync("cansat_packets.txt", stoppingToken);
-        var lineIndex = 0;
+        using var reader = new StreamReader("cansat_packets.txt");
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            if (packetLines.Length > 0)
+            var line = await reader.ReadLineAsync(stoppingToken);
+            if (line is null)
             {
-                // Loop through the file
-                var line = packetLines[lineIndex];
-                var data = ParsePacket(line);
-                if (data != null)
-                {
-                    await _hubContext.Clients.All.SendAsync("ReceiveSensorData", data, stoppingToken);
-                }
-                lineIndex = (lineIndex + 1) % packetLines.Length;
+                // Reset stream
+                reader.BaseStream.Seek(0, SeekOrigin.Begin);
+                continue;
             }
 
-            await Task.Delay(1000, stoppingToken); // Update every 1 second
+            var data = Parse(line);
+            await hub.Clients.All.SendAsync("ReceiveTelemetry", data, cancellationToken: stoppingToken);
+            await Task.Delay(1000, stoppingToken);
         }
     }
 
-    private CanSatData? ParsePacket(string hexLine)
+    private CanSatData Parse(string hexData)
     {
-        try
+        // Remove spaces and convert hex string to bytes
+        var cleanHex = hexData.Replace(" ", "");
+        var bytes = new byte[cleanHex.Length / 2];
+        for (int i = 0; i < bytes.Length; i++)
         {
-            var hexChars = hexLine.Replace(" ", "");
-            if (hexChars.Length != 200) return null;
-
-            byte[] bytes = Enumerable.Range(0, hexChars.Length)
-                                     .Where(x => x % 2 == 0)
-                                     .Select(x => Convert.ToByte(hexChars.Substring(x, 2), 16))
-                                     .ToArray();
-
-            var data = new CanSatData
-            {
-                MissionTime = BitConverter.ToSingle(bytes, 7).ToString("F0"),
-                Altitude = (int)BitConverter.ToSingle(bytes, 15),
-                Pressure = BitConverter.ToSingle(bytes, 19),
-                Temperature = BitConverter.ToSingle(bytes, 23),
-                Humidity = BitConverter.ToSingle(bytes, 27),
-                VocIndex = (int)BitConverter.ToSingle(bytes, 35),
-                Latitude = BitConverter.ToSingle(bytes, 43),
-                Longitude = BitConverter.ToSingle(bytes, 47),
-                GpsAltitude = BitConverter.ToInt32(bytes, 51),
-                SatelliteCount = BitConverter.ToInt32(bytes, 55),
-                Pitch = BitConverter.ToSingle(bytes, 63),
-                Roll = BitConverter.ToSingle(bytes, 67),
-                Yaw = BitConverter.ToSingle(bytes, 71),
-                Acceleration = new Vector3
-                {
-                    X = BitConverter.ToSingle(bytes, 75),
-                    Y = BitConverter.ToSingle(bytes, 79),
-                    Z = BitConverter.ToSingle(bytes, 83)
-                },
-                MagneticField = new Vector3
-                {
-                    X = BitConverter.ToSingle(bytes, 87),
-                    Y = BitConverter.ToSingle(bytes, 91),
-                    Z = BitConverter.ToSingle(bytes, 95)
-                },
-                PictureStatus = "OK"
-            };
-            return data;
+            bytes[i] = Convert.ToByte(cleanHex.Substring(i * 2, 2), 16);
         }
-        catch (Exception ex)
+
+        // Parse binary data according to CanSat packet format
+        var telemetry = new CanSatData
         {
-            Console.WriteLine($"Error parsing packet: {ex.Message}");
-            return null;
-        }
+            PacketCount = Math.Max(0, BitConverter.ToInt32(bytes, 4)), // bytes 4-7
+            MissionTime = TimeSpan.FromSeconds(Math.Max(0, Math.Min(BitConverter.ToSingle(bytes, 8), 86400))), // bytes 8-11, limit to 24 hours
+            Mode = bytes[12] == 0x46 ? "Flight" : "Simulation", // byte 12 (0x46 = 'F')
+            Altitude = BitConverter.ToSingle(bytes, 16), // bytes 16-19
+            Pressure = BitConverter.ToSingle(bytes, 20), // bytes 20-23
+            Temperature = BitConverter.ToSingle(bytes, 24), // bytes 24-27
+            Voltage = BitConverter.ToSingle(bytes, 28), // bytes 28-31
+            GpsTime = TimeSpan.FromSeconds(Math.Max(0, Math.Min(BitConverter.ToSingle(bytes, 32), 86400))), // bytes 32-35, limit to 24 hours
+            GpsLatitude = BitConverter.ToSingle(bytes, 36), // bytes 36-39
+            GpsLongitude = BitConverter.ToSingle(bytes, 40), // bytes 40-43
+            GpsAltitude = BitConverter.ToSingle(bytes, 44), // bytes 44-47
+            GpsSats = Math.Max(0, BitConverter.ToInt32(bytes, 48)), // bytes 48-51
+            TiltX = BitConverter.ToSingle(bytes, 52), // bytes 52-55
+            TiltY = BitConverter.ToSingle(bytes, 56), // bytes 56-59
+            TiltZ = BitConverter.ToSingle(bytes, 60), // bytes 60-63
+            State = "Active", // Default state
+        };
+
+        return telemetry;
     }
 }

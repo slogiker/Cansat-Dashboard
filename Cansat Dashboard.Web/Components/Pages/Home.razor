@@ -1,121 +1,78 @@
 ﻿@page "/"
-@rendermode @(new InteractiveServerRenderMode(prerender: true))
-
-@using Cansat_Dashboard.ApiService
-@using Cansat_Dashboard.ServiceDefaults
-@using Cansat_Dashboard
-@using Cansat_Dashboard.ServiceDefaults
-@using Cansat_Dashboard.ApiService.Data
-@using Cansat_Dashboard.ApiService.Services
 @using Microsoft.AspNetCore.SignalR.Client
-@inject IConfiguration Configuration
-@inject NavigationManager Navigation
-@inject IJSRuntime JSRuntime
-@inject DashboardState State
-@inject IHttpClientFactory HttpClientFactory
+@using Cansat_Dashboard.ApiService
 @implements IAsyncDisposable
 
-<PageTitle>Dashboard</PageTitle>
+<PageTitle>Home</PageTitle>
 
-@if (!string.IsNullOrEmpty(errorMessage))
-{
-    <div style="background-color: #7f1d1d; color: white; padding: 20px; margin: 20px; border-radius: 8px; font-family: monospace; white-space: pre-wrap;">
-        <h2>An error occurred while connecting to the dashboard:</h2>
-        <p>@errorMessage</p>
-    </div>
-}
-else
-{
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
-        <!-- LEFT COLUMN: SENSORS & TERMINAL -->
-        <div class="flex flex-col gap-6">
-            <!-- SENSORS GRID -->
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <div class="data-card"><h4>Temperature</h4><p>@cansatData.Temperature.ToString("F2")°</p></div>
-                <div class="data-card"><h4>Pressure</h4><p>@cansatData.Pressure.ToString("F0")hPa</p></div>
-                <div class="data-card"><h4>Humidity</h4><p>@cansatData.Humidity.ToString("F2")%</p></div>
-                <div class="data-card"><h4>Satelit</h4><p>@cansatData.SatelliteCount</p></div>
-                <div class="data-card"><h4>UV Index</h4><p>@cansatData.UvIndex</p></div>
-                <div class="data-card"><h4>Lux</h4><p>@cansatData.Lux lx</p></div>
-                <div class="data-card"><h4>VOC Index</h4><p>@cansatData.VocIndex</p></div>
-                <div class="data-card"><h4>Picture</h4><p>@cansatData.PictureStatus</p></div>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="data-card col-span-1"><h4>Magnetic field</h4><p class="small-text">x:@cansatData.MagneticField.X.ToString("F2") y:@cansatData.MagneticField.Y.ToString("F2") z:@cansatData.MagneticField.Z.ToString("F2")</p></div>
-                <div class="data-card col-span-1"><h4>Acceleration</h4><p class="small-text">x:@cansatData.Acceleration.X.ToString("F2") y:@cansatData.Acceleration.Y.ToString("F2") z:@cansatData.Acceleration.Z.ToString("F2")</p></div>
-            </div>
+<h1>Cansat Dashboard</h1>
 
-            <!-- LIVE OUTPUT / TERMINAL -->
-            <div class="dark-container flex-grow flex flex-col p-2">
-                <label class="text-xs text-gray-400 px-2">Live output</label>
-                <div id="live-output" class="flex-grow bg-transparent p-2 text-sm whitespace-pre-wrap overflow-y-auto h-32">
-                    @((MarkupString)liveOutput)
+<div class="container">
+    <div class="row">
+        <div class="col-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Status</h5>
+                    <p>Connection: @(IsConnected ? "Connected" : "Disconnected")</p>
                 </div>
-                <input id="command-input" type="text" placeholder="Enter command..." class="w-full bg-transparent border-t border-gray-600 p-2 focus:outline-none text-sm">
+            </div>
+            <div class="card mt-2">
+                <div class="card-body">
+                    <h5 class="card-title">General</h5>
+                    <p>@lastTelemetry?.State</p>
+                    <p>@lastTelemetry?.Mode</p>
+                    <p>@lastTelemetry?.MissionTime</p>
+                </div>
+            </div>
+            <div class="card mt-2">
+                <div class="card-body">
+                    <h5 class="card-title">GPS</h5>
+                    <p>@lastTelemetry?.GpsTime</p>
+                    <p>@lastTelemetry?.GpsLatitude</p>
+                    <p>@lastTelemetry?.GpsLongitude</p>
+                    <p>@lastTelemetry?.GpsAltitude</p>
+                    <p>@lastTelemetry?.GpsSats</p>
+                </div>
             </div>
         </div>
-
-        <!-- RIGHT COLUMN: 3D OBJECT & MAP -->
-        <div class="flex flex-col gap-6">
-            <div class="dark-container flex-grow flex flex-col min-h-[300px]">
-                <div id="model-container" class="w-full h-full flex-grow relative flex items-center justify-center">
-                    <p class="text-gray-400">CANSAT 3D object placeholder</p>
+        <div class="col-8">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Graphs</h5>
                 </div>
             </div>
-            <p id="rotation-display" class="text-center text-sm text-gray-300 -mt-2">Pitch: @cansatData.Pitch.ToString("F2")° - Roll: @cansatData.Roll.ToString("F2")° - Yaw: @cansatData.Yaw.ToString("F2")°</p>
-
-            <div class="dark-container flex flex-col">
-                <div class="w-full h-auto rounded-md object-cover flex items-center justify-center bg-gray-700 min-h-[150px]">
-                    <p class="text-gray-400">Map placeholder</p>
-                </div>
-            </div>
-            <p id="coords-display" class="text-center text-sm text-gray-300 -mt-2">Latitude: @cansatData.Latitude.ToString("F5")° - Longitude: @cansatData.Longitude.ToString("F5")° - Altitude: @cansatData.Altitude m</p>
         </div>
     </div>
-}
+</div>
+
 
 @code {
-    private HubConnection? _hubConnection;
-    private CanSatData cansatData = new CanSatData();
-    private string liveOutput = "Awaiting telemetry...";
-    private string? errorMessage;
+    private HubConnection? hubConnection;
+    private List<CanSatData> telemetries = new();
+    private CanSatData? lastTelemetry => telemetries.LastOrDefault();
 
     protected override async Task OnInitializedAsync()
     {
-        try
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl("http://localhost:5458/dashboardhub")
+            .Build();
+
+        hubConnection.On<CanSatData>("ReceiveTelemetry", (data) =>
         {
-            // Get the API service URL
-            var httpClient = HttpClientFactory.CreateClient("apiservice");
-            var apiBaseUrl = httpClient.BaseAddress?.ToString().TrimEnd('/') ?? "https://localhost:7427";
+            telemetries.Add(data);
+            StateHasChanged();
+        });
 
-            // Build the SignalR hub URL
-            var hubUrl = $"{apiBaseUrl}/dashboardHub";
-
-            _hubConnection = new HubConnectionBuilder()
-                .WithUrl(hubUrl)
-                .Build();
-
-            _hubConnection.On<CanSatData>("ReceiveSensorData", (data) =>
-            {
-                cansatData = data;
-                State.SetHeaderData(data.MissionTime, data.Battery);
-                liveOutput += $"<br/>[{data.MissionTime}] Telemetry received.";
-                InvokeAsync(StateHasChanged);
-            });
-
-            await _hubConnection.StartAsync();
-        }
-        catch (Exception ex)
-        {
-            errorMessage = ex.ToString();
-        }
+        await hubConnection.StartAsync();
     }
+
+    public bool IsConnected => hubConnection?.State == HubConnectionState.Connected;
 
     public async ValueTask DisposeAsync()
     {
-        if (_hubConnection is not null)
+        if (hubConnection is not null)
         {
-            await _hubConnection.DisposeAsync();
+            await hubConnection.DisposeAsync();
         }
     }
 }

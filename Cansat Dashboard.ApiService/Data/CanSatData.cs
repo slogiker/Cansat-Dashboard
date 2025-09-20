@@ -1,31 +1,22 @@
-﻿namespace Cansat_Dashboard.ApiService.Data;
+﻿namespace Cansat_Dashboard.ApiService;
 
 public class CanSatData
 {
-    public float Temperature { get; set; }
+    public int PacketCount { get; set; }
+    public TimeSpan MissionTime { get; set; }
+    public string Mode { get; set; } = string.Empty;
+    public bool IsSimulation => Mode == "S";
+    public float Altitude { get; set; }
     public float Pressure { get; set; }
-    public float Humidity { get; set; }
-    public int SatelliteCount { get; set; }
-    public int UvIndex { get; set; }
-    public int Lux { get; set; }
-    public int VocIndex { get; set; }
-    public string PictureStatus { get; set; } = "OK";
-    public Vector3 MagneticField { get; set; } = new();
-    public Vector3 Acceleration { get; set; } = new();
-    public float Pitch { get; set; }
-    public float Roll { get; set; }
-    public float Yaw { get; set; }
-    public double Latitude { get; set; }
-    public double Longitude { get; set; }
-    public int Altitude { get; set; }
-    public int GpsAltitude { get; set; }
-    public string MissionTime { get; set; } = "00:00:00";
-    public string Battery { get; set; } = "---%";
-}
-
-public class Vector3
-{
-    public float X { get; set; }
-    public float Y { get; set; }
-    public float Z { get; set; }
+    public float Temperature { get; set; }
+    public float Voltage { get; set; }
+    public TimeSpan GpsTime { get; set; }
+    public float GpsLatitude { get; set; }
+    public float GpsLongitude { get; set; }
+    public float GpsAltitude { get; set; }
+    public int GpsSats { get; set; }
+    public float TiltX { get; set; }
+    public float TiltY { get; set; }
+    public float TiltZ { get; set; }
+    public string State { get; set; } = string.Empty;
 }
