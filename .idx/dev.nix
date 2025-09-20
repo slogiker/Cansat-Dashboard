@@ -12,6 +12,7 @@
     # pkgs.nodejs_20
     # pkgs.nodePackages.nodemon
     pkgs.dotnet-sdk_8
+    pkgs.openssl
   ];
 
   # Sets environment variables in the workspace
