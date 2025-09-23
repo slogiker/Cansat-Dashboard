@@ -2,23 +2,15 @@
 
 	<PropertyGroup>
 		<TargetFramework>net8.0</TargetFramework>
-		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<RootNamespace>Cansat_Dashboard.ApiService</RootNamespace>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.0-rc.1.25451.107" />
-		<PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.4" />
-	</ItemGroup>
-
-	<ItemGroup>
+		<FrameworkReference Include="Microsoft.AspNetCore.App" />
 		<ProjectReference Include="..\Cansat Dashboard.ServiceDefaults\Cansat Dashboard.ServiceDefaults.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<None Update="cansat_packets.txt">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
+		<ProjectReference Include="..\Cansat Dashboard.Shared.csproj" />
 	</ItemGroup>
 
 </Project>

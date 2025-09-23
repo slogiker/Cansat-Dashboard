@@ -1,78 +1,65 @@
 ﻿@page "/"
-@using Microsoft.AspNetCore.SignalR.Client
-@using Cansat_Dashboard.ApiService
-@implements IAsyncDisposable
+@using Cansat_Dashboard.Web.Components
+@using Cansat_Dashboard.Shared
+@inject DashboardState State
+@implements IDisposable
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Cansat Dashboard</PageTitle>
 
 <h1>Cansat Dashboard</h1>
 
-<div class="container">
-    <div class="row">
-        <div class="col-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Status</h5>
-                    <p>Connection: @(IsConnected ? "Connected" : "Disconnected")</p>
-                </div>
-            </div>
-            <div class="card mt-2">
-                <div class="card-body">
-                    <h5 class="card-title">General</h5>
-                    <p>@lastTelemetry?.State</p>
-                    <p>@lastTelemetry?.Mode</p>
-                    <p>@lastTelemetry?.MissionTime</p>
-                </div>
-            </div>
-            <div class="card mt-2">
-                <div class="card-body">
-                    <h5 class="card-title">GPS</h5>
-                    <p>@lastTelemetry?.GpsTime</p>
-                    <p>@lastTelemetry?.GpsLatitude</p>
-                    <p>@lastTelemetry?.GpsLongitude</p>
-                    <p>@lastTelemetry?.GpsAltitude</p>
-                    <p>@lastTelemetry?.GpsSats</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-8">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Graphs</h5>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+<p>Status: @(State.IsConnected ? "Connected" : "Disconnected (Using Mock Data)")</p>
 
+@if (State.Data.Count == 0)
+{
+    <p><em>Waiting for data...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Packet</th>
+                <th>State</th>
+                <th>Temperature (°C)</th>
+                <th>Pressure (hPa)</th>
+                <th>Altitude (m)</th>
+                <th>Voltage (V)</th>
+                <th>GPS Sats</th>
+                <th>Lat / Lon</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var data in State.Data.OrderByDescending(d => d.PacketCount).Take(20))
+            {
+                <tr>
+                    <td>@data.PacketCount</td>
+                    <td>@data.MissionState</td>
+                    <td>@data.Temperature.ToString("F2")</td>
+                    <td>@data.Pressure.ToString("F1")</td>
+                    <td>@data.GpsAltitude.ToString("F1")</td>
+                    <td>@data.BatteryVoltage.ToString("F2")</td>
+                    <td>@data.GpsSatellites</td>
+                    <td>@data.GpsLatitude.ToString("F4"), @data.GpsLongitude.ToString("F4")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
 
 @code {
-    private HubConnection? hubConnection;
-    private List<CanSatData> telemetries = new();
-    private CanSatData? lastTelemetry => telemetries.LastOrDefault();
-
     protected override async Task OnInitializedAsync()
     {
-        hubConnection = new HubConnectionBuilder()
-            .WithUrl("http://localhost:5458/dashboardhub")
-            .Build();
-
-        hubConnection.On<CanSatData>("ReceiveTelemetry", (data) =>
+        State.OnChange += StateHasChanged;
+        // Check if Init has already been run to avoid re-initializing on hot reload
+        if (State.Data.Count == 0)
         {
-            telemetries.Add(data);
-            StateHasChanged();
-        });
-
-        await hubConnection.StartAsync();
+            await State.Init();
+        }
     }
 
-    public bool IsConnected => hubConnection?.State == HubConnectionState.Connected;
-
-    public async ValueTask DisposeAsync()
+    public void Dispose()
     {
-        if (hubConnection is not null)
-        {
-            await hubConnection.DisposeAsync();
-        }
+        State.OnChange -= StateHasChanged;
     }
 }
