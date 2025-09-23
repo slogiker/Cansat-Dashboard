@@ -7,7 +7,7 @@
     "autoprefixer": "^10.4.20"
   },
   "scripts": {
-    "build:css": "tailwindcss -i Styles/tailwind.css -o wwwroot/css/tailwind.css -c tailwind.config.js --minify",
+    "build:css": "tailwindcss -i Styles/tailwind.css -o wwwroot/css/tailwind.css -c tailwind.config.js --minify", 
     "watch:css": "tailwindcss -i Styles/tailwind.css -o wwwroot/css/tailwind.css -c tailwind.config.js --watch"
 
   }
