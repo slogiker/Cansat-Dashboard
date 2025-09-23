@@ -50,7 +50,7 @@ else
 @code {
     protected override async Task OnInitializedAsync()
     {
-        State.OnChange += StateHasChanged;
+        State.OnChange += HandleStateChanged;
         // Check if Init has already been run to avoid re-initializing on hot reload
         if (State.Data.Count == 0)
         {
@@ -58,8 +58,13 @@ else
         }
     }
 
+    private Task HandleStateChanged()
+    {
+        return InvokeAsync(StateHasChanged);
+    }
+
     public void Dispose()
     {
-        State.OnChange -= StateHasChanged;
+        State.OnChange -= HandleStateChanged;
     }
 }

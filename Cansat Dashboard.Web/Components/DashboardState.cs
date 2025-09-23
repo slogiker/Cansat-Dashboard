@@ -17,8 +17,14 @@ namespace Cansat_Dashboard.Web.Components
 
         public List<CanSatData> Data { get; private set; } = new();
         public bool IsConnected { get; private set; } = false;
+        public string MissionTime => Data.Count == 0
+            ? "00:00:00"
+            : TimeSpan.FromSeconds(Data.Count).ToString();
+        public string Battery => Data.Count == 0
+            ? "--"
+            : $"{Data[^1].BatteryVoltage:F2} V";
 
-        public event Action? OnChange;
+        public event Func<Task>? OnChange;
 
         public DashboardState(IConfiguration configuration)
         {
@@ -78,7 +84,19 @@ namespace Cansat_Dashboard.Web.Components
             }, null, 0, 1000);
         }
 
-        private void NotifyStateChanged() => OnChange?.Invoke();
+        private async void NotifyStateChanged()
+        {
+            if (OnChange is not null)
+            {
+                try
+                {
+                    await OnChange.Invoke();
+                }
+                catch
+                {
+                }
+            }
+        }
 
         public async ValueTask DisposeAsync()
         {

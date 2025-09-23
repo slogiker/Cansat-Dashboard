@@ -1,7 +1,6 @@
 using Cansat_Dashboard.Web.Components;
-using Cansat_Dashboard.Shared; 
-using Microsoft.Extensions.Hosting;
-using Microsoft.OpenApi.Models; // for Swagger
+using Cansat_Dashboard.Shared;
+using Cansat_Dashboard.ServiceDefaults;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -39,7 +38,7 @@ app.UseAntiforgery();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
-// Map default endpoints
+// Map default endpoints (provided by ServiceDefaults)
 app.MapDefaultEndpoints();
 
 app.Run();

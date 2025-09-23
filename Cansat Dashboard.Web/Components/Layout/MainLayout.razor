@@ -1,5 +1,4 @@
 ﻿@inherits LayoutComponentBase
-@using Cansat_Dashboard.ApiService
 @using Cansat_Dashboard.Web.Components
 @inject DashboardState State
 @implements IDisposable
@@ -32,11 +31,16 @@
 @code {
     protected override void OnInitialized()
     {
-        State.OnChange += StateHasChanged;
+        State.OnChange += HandleStateChanged;
+    }
+
+    private Task HandleStateChanged()
+    {
+        return InvokeAsync(StateHasChanged);
     }
 
     public void Dispose()
     {
-        State.OnChange -= StateHasChanged;
+        State.OnChange -= HandleStateChanged;
     }
 }

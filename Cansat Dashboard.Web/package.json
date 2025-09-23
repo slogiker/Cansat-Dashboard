@@ -1,0 +1,14 @@
+{
+  "name": "cansat-dashboard-web",
+  "private": true,
+  "devDependencies": {
+    "tailwindcss": "^3.4.10",
+    "postcss": "^8.4.47",
+    "autoprefixer": "^10.4.20"
+  },
+  "scripts": {
+    "build:css": "tailwindcss -i Styles/tailwind.css -o wwwroot/css/tailwind.css -c tailwind.config.js --minify",
+    "watch:css": "tailwindcss -i Styles/tailwind.css -o wwwroot/css/tailwind.css -c tailwind.config.js --watch"
+
+  }
+}
