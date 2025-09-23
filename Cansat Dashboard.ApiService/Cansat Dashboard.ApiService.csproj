@@ -8,9 +8,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<FrameworkReference Include="Microsoft.AspNetCore.App" />
 		<ProjectReference Include="..\Cansat Dashboard.ServiceDefaults\Cansat Dashboard.ServiceDefaults.csproj" />
-		<ProjectReference Include="..\Cansat Dashboard.Shared.csproj" />
+		<ProjectReference Include="..\Cansat Dashboard.Shared\Cansat Dashboard.Shared.csproj" />
 	</ItemGroup>
 
 </Project>

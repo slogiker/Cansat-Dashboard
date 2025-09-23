@@ -6,7 +6,7 @@ using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 
-namespace Microsoft.Extensions.Hosting;
+namespace Cansat_Dashboard.ServiceDefaults;
 
 // Add service defaults extension methods used by the projects
 public static class Extensions

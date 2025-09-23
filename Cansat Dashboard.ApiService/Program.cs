@@ -1,5 +1,6 @@
 using Cansat_Dashboard.ApiService.Hubs;
 using Cansat_Dashboard.ApiService.Services;
+using Cansat_Dashboard.ServiceDefaults;
 using Microsoft.OpenApi.Models;
 
 

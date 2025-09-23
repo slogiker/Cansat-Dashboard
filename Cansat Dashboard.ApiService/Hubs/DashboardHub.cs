@@ -1,4 +1,4 @@
-﻿using Cansat_Dashboard.ApiService;
+﻿using Cansat_Dashboard.Shared;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Cansat_Dashboard.ApiService.Hubs

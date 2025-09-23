@@ -11,8 +11,6 @@
 		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.4" />
 
 		<ProjectReference Include="..\Cansat Dashboard.Shared\Cansat Dashboard.Shared.csproj" />
-
-		<ProjectReference Include="..\Cansat Dashboard.ServiceDefaults\Cansat Dashboard.ServiceDefaults.csproj" />
 	</ItemGroup>
 
 </Project>
