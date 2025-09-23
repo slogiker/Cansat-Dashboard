@@ -1,5 +1,5 @@
 using Cansat_Dashboard.Web.Components;
-using Cansat_Dashboard.Shared;
+using Cansat_Dashboard.Shared; 
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models; // for Swagger
 
