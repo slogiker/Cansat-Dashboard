@@ -1,0 +1,1 @@
+﻿Header,Payload,CRC,PacketCount,Timestamp,BatteryVoltage,Temperature,Pressure,Humidity,VocIndex,UvIndex,Lux,MagX,MagY,MagZ,AccelX,AccelY,AccelZ,GyroX,GyroY,GyroZ,Yaw,Pitch,Roll,GpsLatitude,GpsLongitude,GpsAltitude,GpsSatellites

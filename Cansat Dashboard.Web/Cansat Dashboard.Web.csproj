@@ -12,6 +12,10 @@
 		<ProjectReference Include="..\Cansat Dashboard.ServiceDefaults\Cansat Dashboard.ServiceDefaults.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="wwwroot\models\" />
+	</ItemGroup>
+
 	<Target Name="BuildTailwind" BeforeTargets="Build">
 		<Exec Command="npm install --no-audit --no-fund" WorkingDirectory="$(MSBuildProjectDirectory)" Condition="Exists('$(MSBuildProjectDirectory)\\package.json')" />
 		<Exec Command="npx tailwindcss -i Styles/tailwind.css -o wwwroot\\css\\tailwind.css -c tailwind.config.js --minify" WorkingDirectory="$(MSBuildProjectDirectory)" Condition="Exists('$(MSBuildProjectDirectory)\\package.json')" />

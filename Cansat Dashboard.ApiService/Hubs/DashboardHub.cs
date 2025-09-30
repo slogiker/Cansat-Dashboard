@@ -5,9 +5,7 @@ namespace Cansat_Dashboard.ApiService.Hubs
 {
     public class DashboardHub : Hub
     {
-        public async Task SendTelemetry(CanSatData data)
-        {
-            await Clients.All.SendAsync("ReceiveTelemetry", data);
-        }
+        // The "SendTelemetry" method has been removed.
+        // The "ReceiveData" message is sent directly from the TelemetryService.
     }
 }

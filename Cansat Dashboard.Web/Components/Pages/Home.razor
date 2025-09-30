@@ -2,69 +2,105 @@
 @using Cansat_Dashboard.Web.Components
 @using Cansat_Dashboard.Shared
 @inject DashboardState State
-@implements IDisposable
+@inject IJSRuntime JSRuntime
+@implements IAsyncDisposable
 
 <PageTitle>Cansat Dashboard</PageTitle>
 
-<h1>Cansat Dashboard</h1>
+<header class="p-4">
+    <div class="container mx-auto flex justify-between items-center">
+        <h1 class="header-title text-3xl font-bold text-white">CANSAT DASHBOARD</h1>
+        <div class="flex items-center space-x-8">
+            <div class="text-center">
+                <p class="text-sm text-gray-400">Mission Time</p>
+                <p id="mission-time" class="text-2xl font-bold text-white">@State.MissionTime</p>
+            </div>
+            <div class="text-center">
+                <p class="text-sm text-gray-400">Battery</p>
+                <p id="battery-level" class="text-2xl font-bold text-white">@State.Battery</p>
+            </div>
+            <div class="text-white text-4xl cursor-pointer">
+                &#9776;
+            </div>
+        </div>
+    </div>
+</header>
 
-<p>Status: @(State.IsConnected ? "Connected" : "Disconnected (Using Mock Data)")</p>
+<main class="flex-grow container mx-auto p-4">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
 
-@if (State.Data.Count == 0)
-{
-    <p><em>Waiting for data...</em></p>
-}
-else
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Packet</th>
-                <th>State</th>
-                <th>Temperature (°C)</th>
-                <th>Pressure (hPa)</th>
-                <th>Altitude (m)</th>
-                <th>Voltage (V)</th>
-                <th>GPS Sats</th>
-                <th>Lat / Lon</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var data in State.Data.OrderByDescending(d => d.PacketCount).Take(20))
-            {
-                <tr>
-                    <td>@data.PacketCount</td>
-                    <td>@data.MissionState</td>
-                    <td>@data.Temperature.ToString("F2")</td>
-                    <td>@data.Pressure.ToString("F1")</td>
-                    <td>@data.GpsAltitude.ToString("F1")</td>
-                    <td>@data.BatteryVoltage.ToString("F2")</td>
-                    <td>@data.GpsSatellites</td>
-                    <td>@data.GpsLatitude.ToString("F4"), @data.GpsLongitude.ToString("F4")</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+        <div class="flex flex-col gap-6">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div class="sensor-card"><h3 class="sensor-card-title">Temperature</h3><p id="temp-value" class="sensor-card-value">@State.Data.LastOrDefault()?.Temperature.ToString("F2")°</p></div>
+                <div class="sensor-card"><h3 class="sensor-card-title">Pressure</h3><p id="pressure-value" class="sensor-card-value">@State.Data.LastOrDefault()?.Pressure.ToString("F0")hPa</p></div>
+                <div class="sensor-card"><h3 class="sensor-card-title">Humidity</h3><p id="humidity-value" class="sensor-card-value">@State.Data.LastOrDefault()?.Humidity.ToString("F2")%</p></div>
+                <div class="sensor-card"><h3 class="sensor-card-title">Satellite</h3><p id="sat-value" class="sensor-card-value">@State.Data.LastOrDefault()?.GpsSatellites</p></div>
+                <div class="sensor-card"><h3 class="sensor-card-title">UV Index</h3><p id="uv-value" class="sensor-card-value">@State.Data.LastOrDefault()?.UvIndex.ToString("F1")</p></div>
+                <div class="sensor-card"><h3 class="sensor-card-title">Lux</h3><p id="lux-value" class="sensor-card-value">@State.Data.LastOrDefault()?.Lux.ToString("F0") lx</p></div>
+                <div class="sensor-card"><h3 class="sensor-card-title">VOC Index</h3><p id="voc-value" class="sensor-card-value">@State.Data.LastOrDefault()?.VocIndex.ToString("F0")</p></div>
+                <div class="sensor-card"><h3 class="sensor-card-title">Picture</h3><p id="pic-value" class="sensor-card-value">@State.Data.LastOrDefault()?.PhotoId</p></div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="sensor-card col-span-1"><h3 class="sensor-card-title">Magnetic field</h3><p id="mag-value" class="sensor-card-value">x:@State.Data.LastOrDefault()?.MagX.ToString("F1") y:@State.Data.LastOrDefault()?.MagY.ToString("F1") z:@State.Data.LastOrDefault()?.MagZ.ToString("F1")</p></div>
+                <div class="sensor-card col-span-1"><h3 class="sensor-card-title">Acceleration</h3><p id="accel-value" class="sensor-card-value">x:@State.Data.LastOrDefault()?.AccelX.ToString("F2") y:@State.Data.LastOrDefault()?.AccelY.ToString("F2") z:@State.Data.LastOrDefault()?.AccelZ.ToString("F2")</p></div>
+            </div>
+
+            <div class="dark-container flex-grow flex flex-col p-2">
+                <label class="text-xs text-gray-400 px-2">Live output</label>
+                <div id="live-output" class="flex-grow bg-transparent p-2 text-sm whitespace-pre-wrap overflow-y-auto h-32"></div>
+                <input id="command-input" type="text" placeholder="Enter command..." class="w-full bg-transparent border-t border-gray-600 p-2 focus:outline-none text-sm">
+            </div>
+        </div>
+
+        <div class="flex flex-col gap-6">
+            <div class="dark-container flex-grow flex flex-col min-h-[300px]">
+                <div id="model-container" class="w-full h-full flex-grow relative">
+                    <div id="model-placeholder" class="absolute inset-0 flex items-center justify-center">
+                        <p class="text-gray-400">CANSAT 3D object</p>
+                    </div>
+                </div>
+            </div>
+            <p id="rotation-display" class="text-center text-sm text-gray-300 -mt-2">Pitch: @State.Data.LastOrDefault()?.Pitch.ToString("F2")° - Roll: @State.Data.LastOrDefault()?.Roll.ToString("F2")° - Yaw: @State.Data.LastOrDefault()?.Yaw.ToString("F2")°</p>
+
+            <div class="dark-container flex flex-col">
+                <img src="https://i.imgur.com/3Z1Wf9n.png" alt="Map Placeholder" class="w-full h-auto rounded-md object-cover">
+            </div>
+            <p id="coords-display" class="text-center text-sm text-gray-300 -mt-2">Latitude: @State.Data.LastOrDefault()?.GpsLatitude.ToString("F5")° - Longitude: @State.Data.LastOrDefault()?.GpsLongitude.ToString("F5")° - Altitude: @State.Data.LastOrDefault()?.GpsAltitude.ToString("F0")m</p>
+        </div>
+    </div>
+</main>
 
 @code {
     protected override async Task OnInitializedAsync()
     {
         State.OnChange += HandleStateChanged;
-        // Check if Init has already been run to avoid re-initializing on hot reload
         if (State.Data.Count == 0)
         {
             await State.Init();
         }
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("init3DModel");
+        }
+    }
+
     private Task HandleStateChanged()
     {
+        var lastData = State.Data.LastOrDefault();
+        if (lastData != null)
+        {
+            JSRuntime.InvokeVoidAsync("updateRotation", lastData.Pitch, lastData.Roll, lastData.Yaw);
+        }
         return InvokeAsync(StateHasChanged);
     }
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
         State.OnChange -= HandleStateChanged;
+        await JSRuntime.InvokeVoidAsync("dispose3DModel");
     }
 }
