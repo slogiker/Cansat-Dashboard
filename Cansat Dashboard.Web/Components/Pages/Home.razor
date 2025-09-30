@@ -7,68 +7,38 @@
 
 <PageTitle>Cansat Dashboard</PageTitle>
 
-<header class="p-4">
-    <div class="container mx-auto flex justify-between items-center">
-        <h1 class="header-title text-3xl font-bold text-white">CANSAT DASHBOARD</h1>
-        <div class="flex items-center space-x-8">
-            <div class="text-center">
-                <p class="text-sm text-gray-400">Mission Time</p>
-                <p id="mission-time" class="text-2xl font-bold text-white">@State.MissionTime</p>
-            </div>
-            <div class="text-center">
-                <p class="text-sm text-gray-400">Battery</p>
-                <p id="battery-level" class="text-2xl font-bold text-white">@State.Battery</p>
-            </div>
-            <div class="text-white text-4xl cursor-pointer">
-                &#9776;
-            </div>
+<div class="dashboard-grid">
+    <div class="data-card" id="temperature-card">
+        <h4>Temperature</h4>
+        <p>@(State.Data.LastOrDefault()?.Temperature.ToString("F1") ?? "---")°C</p>
+    </div>
+    
+    <div class="data-card" id="pressure-card">
+        <h4>Pressure</h4>
+        <p>@(State.Data.LastOrDefault()?.Pressure.ToString("F0") ?? "---") hPa</p>
+    </div>
+    
+    <div class="data-card" id="humidity-card">
+        <h4>Humidity</h4>
+        <p>@(State.Data.LastOrDefault()?.Humidity.ToString("F0") ?? "---")%</p>
+    </div>
+    
+    <div class="data-card" id="satellite-card">
+        <h4>GPS Satellites</h4>
+        <p>@(State.Data.LastOrDefault()?.GpsSatellites.ToString() ?? "---")</p>
+    </div>
+    
+    <div id="visualization-wrapper">
+        <div class="dark-container" style="height: 100%;">
+            <div id="model-container" style="width: 100%; height: 100%;"></div>
         </div>
     </div>
-</header>
-
-<main class="flex-grow container mx-auto p-4">
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
-
-        <div class="flex flex-col gap-6">
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <div class="sensor-card"><h3 class="sensor-card-title">Temperature</h3><p id="temp-value" class="sensor-card-value">@State.Data.LastOrDefault()?.Temperature.ToString("F2")°</p></div>
-                <div class="sensor-card"><h3 class="sensor-card-title">Pressure</h3><p id="pressure-value" class="sensor-card-value">@State.Data.LastOrDefault()?.Pressure.ToString("F0")hPa</p></div>
-                <div class="sensor-card"><h3 class="sensor-card-title">Humidity</h3><p id="humidity-value" class="sensor-card-value">@State.Data.LastOrDefault()?.Humidity.ToString("F2")%</p></div>
-                <div class="sensor-card"><h3 class="sensor-card-title">Satellite</h3><p id="sat-value" class="sensor-card-value">@State.Data.LastOrDefault()?.GpsSatellites</p></div>
-                <div class="sensor-card"><h3 class="sensor-card-title">UV Index</h3><p id="uv-value" class="sensor-card-value">@State.Data.LastOrDefault()?.UvIndex.ToString("F1")</p></div>
-                <div class="sensor-card"><h3 class="sensor-card-title">Lux</h3><p id="lux-value" class="sensor-card-value">@State.Data.LastOrDefault()?.Lux.ToString("F0") lx</p></div>
-                <div class="sensor-card"><h3 class="sensor-card-title">VOC Index</h3><p id="voc-value" class="sensor-card-value">@State.Data.LastOrDefault()?.VocIndex.ToString("F0")</p></div>
-                <div class="sensor-card"><h3 class="sensor-card-title">Picture</h3><p id="pic-value" class="sensor-card-value">@State.Data.LastOrDefault()?.PhotoId</p></div>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="sensor-card col-span-1"><h3 class="sensor-card-title">Magnetic field</h3><p id="mag-value" class="sensor-card-value">x:@State.Data.LastOrDefault()?.MagX.ToString("F1") y:@State.Data.LastOrDefault()?.MagY.ToString("F1") z:@State.Data.LastOrDefault()?.MagZ.ToString("F1")</p></div>
-                <div class="sensor-card col-span-1"><h3 class="sensor-card-title">Acceleration</h3><p id="accel-value" class="sensor-card-value">x:@State.Data.LastOrDefault()?.AccelX.ToString("F2") y:@State.Data.LastOrDefault()?.AccelY.ToString("F2") z:@State.Data.LastOrDefault()?.AccelZ.ToString("F2")</p></div>
-            </div>
-
-            <div class="dark-container flex-grow flex flex-col p-2">
-                <label class="text-xs text-gray-400 px-2">Live output</label>
-                <div id="live-output" class="flex-grow bg-transparent p-2 text-sm whitespace-pre-wrap overflow-y-auto h-32"></div>
-                <input id="command-input" type="text" placeholder="Enter command..." class="w-full bg-transparent border-t border-gray-600 p-2 focus:outline-none text-sm">
-            </div>
-        </div>
-
-        <div class="flex flex-col gap-6">
-            <div class="dark-container flex-grow flex flex-col min-h-[300px]">
-                <div id="model-container" class="w-full h-full flex-grow relative">
-                    <div id="model-placeholder" class="absolute inset-0 flex items-center justify-center">
-                        <p class="text-gray-400">CANSAT 3D object</p>
-                    </div>
-                </div>
-            </div>
-            <p id="rotation-display" class="text-center text-sm text-gray-300 -mt-2">Pitch: @State.Data.LastOrDefault()?.Pitch.ToString("F2")° - Roll: @State.Data.LastOrDefault()?.Roll.ToString("F2")° - Yaw: @State.Data.LastOrDefault()?.Yaw.ToString("F2")°</p>
-
-            <div class="dark-container flex flex-col">
-                <img src="https://i.imgur.com/3Z1Wf9n.png" alt="Map Placeholder" class="w-full h-auto rounded-md object-cover">
-            </div>
-            <p id="coords-display" class="text-center text-sm text-gray-300 -mt-2">Latitude: @State.Data.LastOrDefault()?.GpsLatitude.ToString("F5")° - Longitude: @State.Data.LastOrDefault()?.GpsLongitude.ToString("F5")° - Altitude: @State.Data.LastOrDefault()?.GpsAltitude.ToString("F0")m</p>
-        </div>
+    
+    <div id="live-output-wrapper">
+        <div id="live-output"></div>
+        <input type="text" id="command-input" placeholder="Enter command..." />
     </div>
-</main>
+</div>
 
 @code {
     protected override async Task OnInitializedAsync()
@@ -101,6 +71,5 @@
     public async ValueTask DisposeAsync()
     {
         State.OnChange -= HandleStateChanged;
-        await JSRuntime.InvokeVoidAsync("dispose3DModel");
     }
 }
